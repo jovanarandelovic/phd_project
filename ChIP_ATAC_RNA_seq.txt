@@ -1,0 +1,23 @@
+#ChIP-seq bed intersect with ATAC-seq. The whole ChIP peak sequence is kept in the output only where it intersects with ATACseq peak by minimum 1bp
+
+bedtools intersect -wa -a CHIP_BRA.bed -b ATAC.bed > wa_atac_chip_intersect.bed
+
+#conversion from bed to fasta format
+bedtools getfasta -fi <path_to_the_genome> -bed atac_chip_intersect_sorted.bed > atac_chip_intersect.fa
+
+
+#motif discovery with dreme, for short ungapped motifs
+
+dreme -p high_sig_peaks_CHIP_BRA_24h.bed.fa -dna -eps -g 500 -png -norc -maxk 9 -o high_sig_peaks_CHIP_BRA_24h.bed.fa_re500_results
+
+#adding a custom motif in homer
+
+seq2profile.pl GTGYGA dreme_bra_homer > ./Homer/motifs/dreme_bra_homer.motif
+
+#peak annotation with homer, DEG association with peaks and motifs
+annotatePeaks.pl wa_atac_chip_intersect.bed <path_to_the_genome> -gff3 <path_to_gff3_genome_annotation> > annotated_chip_atac_intersect.txt
+
+grep -w -f DE_gene_list.txt annotated_chip_atac_intersect.txt | awk '{print $1}' | grep -w -f - wa_atac_chip_intersect.bed > annotated_peaks_genes.txt
+
+annotatePeaks.pl annotated_peaks_genes.txt <path_to_the_genome> <path_to_gff3_genome_annotation> -m /Homer/motifs/brachyury.motif -m > bra_ _motif_annotated_peaks_genes.txt
+

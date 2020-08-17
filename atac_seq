@@ -1,0 +1,5 @@
+annotatePeaks.pl ATAC.narrowPeak <path_to_the_genome> -gff3 <path_to_gff3_genome_annotation> > annotated_ATAC.txt
+
+grep -w -f DE_gene_list.txt annotated_ATAC.txt | awk '{print $1}' | grep -w -f - ATAC.narrowPeak >  ATAC_annotated_peaks_genes.txt
+
+annotatePeaks.pl ATAC_annotated_peaks_genes.txt <path_to_the_genome> <path_to_gff3_genome_annotation> -m /Homer/motifs/brachyury.motif -m > bra_ _motif_annotated_peaks_genes_ATAC.txt
